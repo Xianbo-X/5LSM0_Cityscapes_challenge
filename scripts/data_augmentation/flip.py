@@ -1,12 +1,12 @@
 import torchvision.transforms.functional as TF
 import random
 
-class HorizontalFlip():
+class RandomHorizontalFlip():
     """
     Flip the given image horizontally,
     """
 
-    def __init__(self) -> None:
+    def __init__(self,pr=0.5) -> None:
         pass
 
     def __call__(self, img):
@@ -19,14 +19,16 @@ class HorizontalFlip():
         ---------
             Flipped image
         """
-        return TF.hflip(img)
+        if random.random()<self.pr:
+            return TF.hflip(img)
+        return img
 
-class VerticalFlip():
+class RandomVerticalFlip():
     """
     Flip the given image vertically
     """
 
-    def __init__(self) -> None:
+    def __init__(self,pr=0.5) -> None:
         pass
 
     def __call__(self, img):
@@ -39,7 +41,9 @@ class VerticalFlip():
         ---------
             Flipped image
         """
-        return TF.vflip(img)
+        if random.random()< self.pr:
+            return TF.vflip(img)
+        return img
         
 class RandomHorizontalFlip2():
     """
