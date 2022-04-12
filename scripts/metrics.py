@@ -26,8 +26,8 @@ def compute_iou(output: torch.Tensor, truths: torch.Tensor) -> float:
     """
     Assume in the truths tensor, class id are stored as 0,1,2,... at each place of the tensor
     """
-    output = output.detach()
-    truths = truths.detach()
+    output = output.detach().cpu()
+    truths = truths.detach().cpu()
     
     ## EXERCISE #####################################################################
     #
