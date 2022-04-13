@@ -3,6 +3,7 @@ import torch
 import torch.nn as nn
 # from torch.autograd import Variable
 import numpy as np
+from scripts.unet import UNet
 
 class Conv2dLSTMCell(nn.Module):
     def __init__(self, input_size, hidden_size, kernel_size, bias=True):
@@ -198,5 +199,50 @@ class Conv2dGRUCell(nn.Module):
         new_gate = torch.tanh(x_new + (reset_gate * h_new))
 
         hy = update_gate * hx + (1 - update_gate) * new_gate
+
+        return hy
+
+
+class UnetRNNCell(nn.Module):
+    def __init__(self, input_size, hidden_size, kernel_size, bias=True, nonlinearity="tanh"):
+        super(UnetRNNCell, self).__init__()
+
+        self.input_size = input_size
+        self.hidden_size = hidden_size
+
+        self.bias = bias
+        self.nonlinearity = nonlinearity
+        if self.nonlinearity not in ["tanh", "relu"]:
+            raise ValueError("Invalid nonlinearity selected for RNN.")
+
+        self.x2h = UNet(input_size,hidden_size)
+
+        self.h2h = UNet(hidden_size,hidden_size)
+        self.reset_parameters()
+
+
+    def reset_parameters(self):
+        std = 1.0 / np.sqrt(self.hidden_size)
+        for w in self.parameters():
+            w.data.uniform_(-std, std)
+
+
+    def forward(self, input, hx=None):
+
+        # Inputs:
+        #       input: of shape (batch_size, input_size, height_size, width_size)
+        #       hx: of shape (batch_size, hidden_size, height_size, width_size)
+        # Outputs:
+        #       hy: of shape (batch_size, hidden_size, height_size, width_size)
+
+        if hx is None:
+            # hx = Variable(input.new_zeros(input.size(0), self.hidden_size, input.size(2), input.size(3)))
+            hx = torch.zeros((input.size(0), self.hidden_size, input.size(2), input.size(3)),requires_grad=True)
+        hy = (self.x2h(input) + self.h2h(hx))
+
+        if self.nonlinearity == "tanh":
+            hy = torch.tanh(hy)
+        else:
+            hy = torch.relu(hy)
 
         return hy

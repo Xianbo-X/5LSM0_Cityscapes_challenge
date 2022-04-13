@@ -3,8 +3,8 @@ import torch
 import torch.nn as nn
 # from torch.autograd import Variable
 import numpy as np
-
-from scripts.models.conv2d_rnncells import Conv2dLSTMCell, Conv2dGRUCell, Conv2dRNNCell
+from scripts.unet import UNet
+from scripts.models.conv2d_rnncells import Conv2dLSTMCell, Conv2dGRUCell, Conv2dRNNCell,UnetRNNCell
 
 class Conv2dRNN(nn.Module):
     def __init__(self, input_size, hidden_size, kernel_size, num_layers, bias, output_size, activation='tanh'):
@@ -107,6 +107,94 @@ class Conv2dRNN(nn.Module):
         # out=torch.stack(out)
         # return torch.stack(out)
         return torch.stack(out,dim=-1).flatten(-2)
+
+
+class UnetRNN(nn.Module):
+    def __init__(self, input_size, hidden_size, kernel_size, num_layers, bias, output_size, activation='tanh'):
+        super(UnetRNN, self).__init__()
+
+        self.input_size = input_size
+        self.hidden_size = hidden_size
+
+        if type(kernel_size) == tuple and len(kernel_size) == 2:
+            self.kernel_size = kernel_size
+            self.padding = (kernel_size[0] // 2, kernel_size[1] // 2)
+        elif type(kernel_size) == int:
+            self.kernel_size = (kernel_size, kernel_size)
+            self.padding = (kernel_size // 2, kernel_size // 2)
+        else:
+            raise ValueError("Invalid kernel size.")
+
+        self.num_layers = num_layers
+        self.bias = bias
+        self.output_size = output_size
+
+        self.rnn_cell_list = nn.ModuleList()
+        self.rnn_cell_list.append(UnetRNNCell(self.input_size,
+                                                   self.hidden_size,
+                                                   self.kernel_size,
+                                                   self.bias,
+                                                   "tanh"))
+        for l in range(1, self.num_layers):
+            self.rnn_cell_list.append(UnetRNNCell(self.hidden_size,
+                                                    self.hidden_size,
+                                                    self.kernel_size,
+                                                    self.bias,
+                                                    "tanh"))
+        self.conv = nn.Conv2d(in_channels=self.hidden_size,
+                             out_channels=self.output_size,
+                             kernel_size=self.kernel_size,
+                            #  padding=self.padding,
+                            padding="same",
+                             bias=self.bias)
+
+    def forward(self, input, hx=None):
+
+        # Input of shape (batch_size, seqence length, input_size)
+        #
+        # Output of shape (batch_size, output_size)
+        L=8
+        input=torch.permute(input.reshape((input.shape[0],input.shape[1],input.shape[2],-1,L)),(0,-1,1,2,3))
+
+        if hx is None:
+            h0 = torch.zeros((self.num_layers, input.size(0), self.hidden_size, input.size(-2), input.size(-1)),requires_grad=True)
+            # if torch.cuda.is_available():
+            #     h0 = torch.zeros((self.num_layers, input.size(0), self.hidden_size, input.size(-2), input.size(-1)),requires_grad=True).cuda()
+            # #     h0 = Variable(torch.zeros(self.num_layers, input.size(0), self.hidden_size, input.size(-2), input.size(-1)).cuda())
+            # else:
+            #     h0 = torch.zeros((self.num_layers, input.size(0), self.hidden_size, input.size(-2), input.size(-1)),requires_grad=True)
+            #     h0 = Variable(torch.zeros(self.num_layers, input.size(0), self.hidden_size, input.size(-2), input.size(-1)))
+
+        else:
+             h0 = hx
+
+        outs = []
+
+        hidden = list()
+        for layer in range(self.num_layers):
+            hidden.append(h0[layer])
+
+        for t in range(input.size(1)):
+
+            for layer in range(self.num_layers):
+
+                if layer == 0:
+                    hidden_l = self.rnn_cell_list[layer](input[:, t], hidden[layer])
+                else:
+                    hidden_l = self.rnn_cell_list[layer](hidden[layer - 1],hidden[layer])
+                hidden[layer] = hidden_l
+
+                hidden[layer] = hidden_l
+
+            outs.append(hidden_l)
+
+        out=[]
+        for out_ele in outs:
+            out.append(self.conv(out_ele))
+        # out=torch.stack(out)
+        # return torch.stack(out)
+        return torch.stack(out,dim=-1).flatten(-2)
+
 
 class Conv2dLSTM(nn.Module):
     def __init__(self, input_size, hidden_size, kernel_size, num_layers, bias, output_size):
