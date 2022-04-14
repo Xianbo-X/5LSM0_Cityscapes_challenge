@@ -148,7 +148,7 @@ class UnetRNN(nn.Module):
                             padding="same",
                              bias=self.bias)
 
-    def forward(self, input, hx=None):
+    def forward(self, input, hx=None, cuda_tri = False):
 
         # Input of shape (batch_size, seqence length, input_size)
         #
@@ -174,6 +174,8 @@ class UnetRNN(nn.Module):
         for layer in range(self.num_layers):
             hidden.append(h0[layer])
 
+        if torch.cuda.is_available() and cuda_tri == True:
+                hidden = [h.cuda() for h in hidden]
         for t in range(input.size(1)):
 
             for layer in range(self.num_layers):
