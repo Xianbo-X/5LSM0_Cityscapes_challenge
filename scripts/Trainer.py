@@ -9,15 +9,18 @@ import tqdm
 import sys
 
 class Trainer:
-    def __init__(self, model: nn.Module, ds_split: Dict[str,CityscapesDataset]):
+    def __init__(self, model: nn.Module, ds_split: Dict[str,CityscapesDataset], learning_rate=0.001, writer=None):
         # Choose a device to run training on. Ideally, you have a GPU available to accelerate the training process.
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
-        
+
         # Move the model onto the target device
         self.model = model.to(self.device)
         
         # Store the dataset split
         self.ds_split = ds_split
+
+        # Tensorboard writer
+        self.writer = writer
         
         ## EXERCISE #####################################################################
         #
@@ -29,7 +32,7 @@ class Trainer:
         
         # Define Adam as the optimizer
         # reference: https://arxiv.org/pdf/2007.02839.pdf
-        self.learning_rate = 0.001
+        self.learning_rate = learning_rate
         self.optimizer = optim.Adam(self.model.parameters(), self.learning_rate)
         
         ## EXERCISE #####################################################################
@@ -49,9 +52,14 @@ class Trainer:
         assert self.critereon is not None, "You have not defined a loss"
         assert self.optimizer is not None, "You have not defined an optimizer"
         
-    def train_epoch(self, dl:DataLoader):
+    def train_epoch(self, dl:DataLoader, batch_size, epoch):
         # Put the model in training mode
         self.model.train()
+
+        # Store the total loss and accuracy over the epoch
+        amount = 0
+        total_loss = 0
+        total_accuracy = 0
         
         # Store each step's accuracy and loss for this epoch
         epoch_metrics = {
@@ -86,6 +94,15 @@ class Trainer:
                     'loss': loss.item(),
                     'accuracy': compute_iou(output, truths)
                 }
+
+                # Store loss and accuracy for visualization
+                amount += 1
+                total_loss += step_metrics["loss"]
+                total_accuracy += step_metrics["accuracy"]
+
+                if self.writer is not None:
+                    self.writer.add_scalar("Loss/Minibatches/Training", step_metrics["loss"], amount+2975/batch_size*(epoch-1))
+                    self.writer.add_scalar("Accuracy/Minibatches/Training", step_metrics["accuracy"], amount+2975/batch_size*(epoch-1))
                 
                 # Update the progress bar
                 pbar.set_postfix(**step_metrics)
@@ -97,10 +114,20 @@ class Trainer:
 
         sys.stdout.flush()
         
+        # loss and accuracy per epoch
+        total_loss /= amount
+        total_accuracy /= amount
+
+        epoch_results = {
+            "loss": [total_loss],
+            "accuracy": [total_accuracy]
+        }
+
+
         # Return metrics
-        return epoch_metrics
+        return epoch_metrics, epoch_results
     
-    def val_epoch(self, dl:DataLoader):
+    def val_epoch(self, dl:DataLoader, batch_size, epoch):
         # Put the model in evaluation mode
         self.model.eval()
         
@@ -136,6 +163,11 @@ class Trainer:
                 amount += 1
                 total_loss += step_metrics["loss"]
                 total_accuracy += step_metrics["accuracy"]
+
+                # Store loss and accuracy for visualization
+                if self.writer is not None:
+                    self.writer.add_scalar("Loss/Minibatches/Validation", step_metrics["loss"], amount+500/batch_size*(epoch-1))
+                    self.writer.add_scalar("Accuracy/Minibatches/Validation", step_metrics["accuracy"], amount+500/batch_size*(epoch-1))
         sys.stdout.flush()
         
         # Print mean of metrics
@@ -163,11 +195,20 @@ class Trainer:
         # Train the model for the provided amount of epochs
         for epoch in range(1, epochs+1):
             print(f'Epoch {epoch}')
-            metrics_train = self.train_epoch(dl_train)
+            metrics_train, train_epoch_results = self.train_epoch(dl_train, batch_size, epoch)
             df_train = df_train.append(pd.DataFrame({'epoch': [epoch for _ in range(len(metrics_train["loss"]))], **metrics_train}), ignore_index=True)
             
-            metrics_val = self.val_epoch(dl_val)            
+            metrics_val = self.val_epoch(dl_val, batch_size, epoch)            
             df_val = df_val.append(pd.DataFrame({'epoch': [epoch], **metrics_val}), ignore_index=True) 
+
+            # Store epoch results for visualization
+            if self.writer is not None:
+                self.writer.add_scalars("Loss/Epochs", 
+                                {"Training Loss": train_epoch_results["loss"][0],
+                                "Validation Loss": metrics_val["loss"][0]}, epoch)
+                self.writer.add_scalars("Accuracy/Epochs", 
+                                {"Training Accuracy": train_epoch_results["accuracy"][0],
+                                "Validation Accuracy": metrics_val["accuracy"][0]}, epoch)
             
         # Return a dataframe that logs the training process. This can be exported to a CSV or plotted directly.
         return df_train, df_val
