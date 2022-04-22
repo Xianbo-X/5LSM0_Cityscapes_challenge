@@ -1,7 +1,9 @@
 {
-    "arch":{
-        "module":"unet",
-        "param":""
+    "architecture":{
+        "model":"UNet",
+        "param":{
+            "n_channels": 3,
+            "n_classes": 30}
     },
     "param":{
         "learning_rate": 0.1,
@@ -11,8 +13,11 @@
         "transformation": ""
     },
     "path":{
-        "ROOT_PATH": "",
-        "MODEL_PREFIX": "",
-        "RESULT_PATH": ""
+        "ROOT_PATH": "saves",
+        "SAVE_PATH": "EXP1",
+        "MODEL_PATH":"models",
+        "CHECK_POINT":"",
+        "MODEL_PREFIX": "unet",
+        "RESULT_PATH": "res"
     }
 }
