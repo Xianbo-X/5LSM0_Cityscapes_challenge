@@ -185,7 +185,7 @@ class Trainer:
         }
             
         
-    def fit(self, epochs: int, batch_size:int,aug_mode="None",start_epoch=1,result_foler=None,model_path_prefix=None,save_inter_model=True,**kwargs):
+    def fit(self, epochs: int, batch_size:int,aug_mode="None",start_epoch=1,result_folder=None,model_path_prefix=None,save_inter_model=True,**kwargs):
         """
         Parameters:
         ----------
@@ -212,7 +212,7 @@ class Trainer:
             train_set=ConcatDataset([train_set,train_set_aug])
         print(f"Aug mode={aug_mode}, daset_length={len(train_set)}")
         print(kwargs)
-        print(f"result_foler: {result_foler}")
+        print(f"result_foler: {result_folder}")
         print(f"model_prefix: {model_path_prefix}")
 
         dl_train = DataLoader(train_set, batch_size=batch_size, shuffle=True)
@@ -227,7 +227,7 @@ class Trainer:
         for epoch in range(start_epoch, start_epoch+epochs+1):
             print(f'Epoch {epoch}')
             metrics_train, train_epoch_results = self.train_epoch(dl_train, batch_size, epoch)
-            if save_inter_model and (result_foler is not None and model_path_prefix is not None):
+            if save_inter_model and (result_folder is not None and model_path_prefix is not None):
                 torch.save(self.model,model_path_prefix+f"_epoch_{epoch}.pt")
 
             df_train = df_train.append(pd.DataFrame({'epoch': [epoch for _ in range(len(metrics_train["loss"]))], **metrics_train}), ignore_index=True)

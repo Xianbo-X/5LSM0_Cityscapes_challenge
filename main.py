@@ -31,9 +31,9 @@ dir_truth_pp, dir_input_pp = (f'{d}_{sample_size[0]}_{sample_size[1]}' for d in 
 def training(model,ds_split,conf:Config,writer):
     # Train the network
     print("Testing training process...")
-    writer = SummaryWriter(os.path.join(result_folder,"logs/passthrough"))
+    result_folder=conf.get_result_folder()
     trainer = Trainer(model, ds_split,writer=writer, **conf.get_func_param(Trainer.__init__))
-    df_train, df_val = trainer.fit(result_folder=conf.get_result_folder(),model_path_prefix=conf.get_saves_path_prefix(),**conf.get_func_param(trainer.fit))
+    df_train, df_val = trainer.fit(result_folder=result_folder,model_path_prefix=conf.get_saves_path_prefix(),**conf.get_func_param(trainer.fit))
 
     with open(os.path.join(result_folder,"train.json"), 'w') as file_train:
         json.dump(df_train.to_dict(),file_train)
@@ -83,9 +83,10 @@ if __name__=="__main__":
         print(f"model foler: {model_folder}")
         print(f"result foler: {result_folder}")
         try:
+            writer = SummaryWriter(os.path.join(result_folder,"logs/"))
             model = conf.get_model()
             print("model name: "+str(model).split("\n")[0])
-            training(model,ds_split,**conf.get_func_param(training),result_folder=result_folder)
+            training(model,ds_split,conf,writer=writer)
             # trainer=Trainer(model,ds_split,**conf.get_func_param(Trainer.__init__),writer=None)
             # trainer.fit(**conf.get_func_param(trainer.fit))
             if args.save_name is not None:
