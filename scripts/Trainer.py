@@ -1,12 +1,14 @@
 import torch
 from torch import nn, optim
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader,ConcatDataset
 from typing import Dict, Optional, Tuple, List
 from scripts.dataset.dataset import CityscapesDataset
 from scripts.metrics import compute_iou
 import pandas as pd
 import tqdm
 import sys
+import copy
+from tqdm import tqdm
 
 class Trainer:
     def __init__(self, model: nn.Module, ds_split: Dict[str,CityscapesDataset], learning_rate=0.001, writer=None):
@@ -69,7 +71,7 @@ class Trainer:
         
         # Create a progress bar using TQDM
         sys.stdout.flush()
-        with tqdm(total=len(self.ds_split["train"]), desc=f'Training') as pbar:
+        with tqdm(total=len(dl.dataset), desc=f'Training') as pbar:
             # Iterate over the training dataset
             for inputs, truths in dl:
                 # Zero the gradients from the previous step
@@ -138,7 +140,7 @@ class Trainer:
         
         # Create a progress bar using TQDM
         sys.stdout.flush()
-        with torch.no_grad(), tqdm(total=len(self.ds_split["val"]), desc=f'Validation') as pbar:
+        with torch.no_grad(), tqdm(total=len(dl.dataset), desc=f'Validation') as pbar:
             # Iterate over the validation dataloader
             for inputs, truths in dl:
                  # Move the inputs and truths to the target device
@@ -182,11 +184,35 @@ class Trainer:
         }
             
         
-    def fit(self, epochs: int, batch_size:int):
+    def fit(self, epochs: int, batch_size:int,aug_mode="None"):
+        """
+        Parameters:
+        ----------
+        aug_mode: str
+            "None": No augmentation during training
+            "Only": Train on augmentation data only
+            "Both" Train both origin data and augmentation data
+        """
         # Initialize Dataloaders for the `train` and `val` splits of the dataset. 
         # A Dataloader loads a batch of samples from the each dataset split and concatenates these samples into a batch.
-        dl_train = DataLoader(self.ds_split["train"], batch_size=batch_size, shuffle=True)
-        dl_val = DataLoader(self.ds_split["val"], batch_size=batch_size, drop_last=True)
+        train_set=self.ds_split["train"]
+        val_set=self.ds_split["val"]
+        if aug_mode=="Only":
+            train_set.enable_aug()
+            val_set.no_aug()
+        if aug_mode=="None":
+            train_set.no_aug()
+            val_set.no_aug()
+        if aug_mode=="Both":
+            train_set.no_aug()
+            val_set.no_aug()
+            train_set_aug=copy.deepcopy(train_set)
+            train_set_aug.enable_aug()
+            train_set=ConcatDataset([train_set,train_set_aug])
+        print("Aug mode{aug_mode}, daset_length={len(train_set)}")
+
+        dl_train = DataLoader(train_set, batch_size=batch_size, shuffle=True)
+        dl_val = DataLoader(val_set, batch_size=batch_size, drop_last=True)
                 
         # Store metrics of the training process (plot this to gain insight)
         df_train = pd.DataFrame()

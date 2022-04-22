@@ -170,13 +170,21 @@ class CityscapesDataset_Aug(CityscapesDataset):
         # These variables are also available as globals, but it is good practice to make classes
         # not depend on global variables.
         self.no_augmentation=False
-        self.augmentations=[]
 
     def test(self):
-        self.no_augmentation=True
+        self.no_aug()
     
     def no_aug(self):
         self.no_augmentation=True
+    
+    def enable_aug(self):
+        self.no_augmentation=False
+    
+    def train(self):
+        self.enable_aug()
+
+    def set_transform_list(self,augmentations):
+        self.augmentations=augmentations
 
     def transform(self, img: Image.Image, mask: Optional[Image.Image]) -> (torch.Tensor, torch.Tensor):
         ## EXERCISE #####################################################################
@@ -188,6 +196,7 @@ class CityscapesDataset_Aug(CityscapesDataset):
         #
         ##################################################################################
         if not self.no_augmentation:
+            assert len(self.augmentations)!=0, f"Got Emepty augmentaion list {self.augmentations}"
             T=transforms.Compose(self.augmentations)
             img,mask=T([img,mask])        
         # pass
