@@ -185,7 +185,7 @@ class Trainer:
         }
             
         
-    def fit(self, epochs: int, batch_size:int,aug_mode="None",start_epoch=1,result_folder=None,model_path_prefix=None,save_inter_model=True,**kwargs):
+    def fit(self, epochs: int, batch_size:int,aug_mode="None",result_folder="./",model_path_prefix="MODEL",save_inter_model=False,start_epoch=1,**kwargs):
         """
         Parameters:
         ----------
@@ -227,7 +227,7 @@ class Trainer:
         for epoch in range(start_epoch, start_epoch+epochs+1):
             print(f'Epoch {epoch}')
             metrics_train, train_epoch_results = self.train_epoch(dl_train, batch_size, epoch)
-            if save_inter_model and (result_folder is not None and model_path_prefix is not None):
+            if save_inter_model or (epoch==start_epoch+epochs):
                 torch.save(self.model,model_path_prefix+f"_epoch_{epoch}.pt")
 
             df_train = df_train.append(pd.DataFrame({'epoch': [epoch for _ in range(len(metrics_train["loss"]))], **metrics_train}), ignore_index=True)
@@ -245,4 +245,5 @@ class Trainer:
                                 "Validation Accuracy": metrics_val["accuracy"][0]}, epoch)
             
         # Return a dataframe that logs the training process. This can be exported to a CSV or plotted directly.
+        
         return df_train, df_val

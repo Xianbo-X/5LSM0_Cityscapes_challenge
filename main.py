@@ -70,12 +70,8 @@ if __name__=="__main__":
         ds_split["val"].no_aug()
         ds_split["test"].no_aug()
         
-        path = conf.conf["path"]
-        SAVE_DIR = os.path.abspath(path["ROOT_PATH"])
-        
         model_folder=conf.get_model_folder()
         result_folder=conf.get_result_folder()
-
         assert not os.path.exists(model_folder)
         os.makedirs(model_folder)
         assert not os.path.exists(result_folder)
@@ -83,6 +79,10 @@ if __name__=="__main__":
         print(f"model foler: {model_folder}")
         print(f"result foler: {result_folder}")
         try:
+            with open(os.path.join(conf.get_save_path(),"config.json"),"w") as fout:
+                json.dump(conf.conf,fout)
+                print(f"configuration file write to {os.path.join(result_folder,'config.json')}")
+
             writer = SummaryWriter(os.path.join(result_folder,"logs/"))
             model = conf.get_model()
             print("model name: "+str(model).split("\n")[0])
