@@ -11,6 +11,14 @@ class Config():
     def load_conf(cls,filepath):
         with open(filepath,"r") as fin:
             return json.load(fin)
+    
+    def get_model(self):
+        arch=self.conf["architecture"]
+        prefix=arch["prefix"]
+        class_package=prefix
+        class_name=arch["model"]
+        module=import_module(class_package)
+        return module.__getattribute__(class_name)(**arch["param"])
 
     def get_transformationlist(self):
         transform_conf=self.conf["augmentation"]["transformation"]
