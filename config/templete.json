@@ -1,0 +1,18 @@
+{
+    "arch":{
+        "module":"unet",
+        "param":""
+    },
+    "param":{
+        "learning_rate": 0.1,
+        "epochs": 1,
+        "batch_size": 10,
+        "aug_mode": "",
+        "transformation": ""
+    },
+    "path":{
+        "ROOT_PATH": "",
+        "MODEL_PREFIX": "",
+        "RESULT_PATH": ""
+    }
+}
