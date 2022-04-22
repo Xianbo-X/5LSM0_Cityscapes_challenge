@@ -11,7 +11,8 @@ import copy
 from tqdm import tqdm
 
 class Trainer:
-    def __init__(self, model: nn.Module, ds_split: Dict[str,CityscapesDataset], learning_rate=0.001, writer=None):
+    def __init__(self, model: nn.Module, ds_split: Dict[str,CityscapesDataset], learning_rate=0.001, writer=None,**kwargs):
+        print(learning_rate)
         # Choose a device to run training on. Ideally, you have a GPU available to accelerate the training process.
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -184,7 +185,7 @@ class Trainer:
         }
             
         
-    def fit(self, epochs: int, batch_size:int,aug_mode="None"):
+    def fit(self, epochs: int, batch_size:int,aug_mode="None",**kwargs):
         """
         Parameters:
         ----------
@@ -209,7 +210,8 @@ class Trainer:
             train_set_aug=copy.deepcopy(train_set)
             train_set_aug.enable_aug()
             train_set=ConcatDataset([train_set,train_set_aug])
-        print("Aug mode{aug_mode}, daset_length={len(train_set)}")
+        print(f"Aug mode={aug_mode}, daset_length={len(train_set)}")
+        print(kwargs)
 
         dl_train = DataLoader(train_set, batch_size=batch_size, shuffle=True)
         dl_val = DataLoader(val_set, batch_size=batch_size, drop_last=True)
