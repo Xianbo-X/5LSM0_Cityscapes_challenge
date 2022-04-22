@@ -24,8 +24,8 @@ class RandomCropAndResize():
             
             # corner_left=0
             # corner_top=0
-            print((corner_left,corner_top))
-            print((width,height))
+            # print((corner_left,corner_top))
+            # print((width,height))
             f=lambda x: TF.resized_crop(x,corner_top,corner_left,height,width,size=shape) if x is not None else None
             res=(f(res[0]),f(res[1]))
         return res
