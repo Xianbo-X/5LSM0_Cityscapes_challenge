@@ -174,6 +174,9 @@ class CityscapesDataset_Aug(CityscapesDataset):
 
     def test(self):
         self.no_augmentation=True
+    
+    def no_aug(self):
+        self.no_augmentation=True
 
     def transform(self, img: Image.Image, mask: Optional[Image.Image]) -> (torch.Tensor, torch.Tensor):
         ## EXERCISE #####################################################################
