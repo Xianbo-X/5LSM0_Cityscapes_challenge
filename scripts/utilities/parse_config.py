@@ -39,19 +39,36 @@ class Config():
         params=inspect.getfullargspec(func)[0]
         return dict((key,value) for key, value in self.conf["param"].items() if key in params)
 
-    def get_saves_path(self):
+    # def get_saves_folder(self):
+    #     path = self.conf["path"]
+    #     SAVE_DIR = os.path.abspath(path["ROOT_PATH"])
+    #     model_folder = os.path.join(SAVE_DIR, path["SAVE_PATH"], path["MODEL_PATH"])
+    #     result_folder = os.path.join(SAVE_DIR, path["SAVE_PATH"], path["RESULT_PATH"])
+
+    #     model_path = os.path.join(model_folder, path["MODEL_PREFIX"]+".pt")
+    #     return result_folder, model_path
+    
+    def get_saves_path_prefix(self):
         path = self.conf["path"]
         SAVE_DIR = os.path.abspath(path["ROOT_PATH"])
         model_folder = os.path.join(SAVE_DIR, path["SAVE_PATH"], path["MODEL_PATH"])
+        model_prefix = os.path.join(model_folder, path["MODEL_PREFIX"])
+        return model_prefix
+
+    
+    def get_model_folder(self):
+        path = self.conf["path"]
+        SAVE_DIR = os.path.abspath(path["ROOT_PATH"])
+        model_folder = os.path.join(SAVE_DIR, path["SAVE_PATH"], path["MODEL_PATH"])
+
+        return model_folder
+
+    def get_result_folder(self):
+        path = self.conf["path"]
+        SAVE_DIR = os.path.abspath(path["ROOT_PATH"])
         result_folder = os.path.join(SAVE_DIR, path["SAVE_PATH"], path["RESULT_PATH"])
-
-        if not os.path.exists(model_folder):
-            os.makedirs(model_folder)
-        if not os.path.exists(result_folder):
-            os.makedirs(result_folder)
-
-        model_path = os.path.join(model_folder, path["MODEL_PREFIX"]+".pt")
-        return result_folder, model_path
-
+        
+        return result_folder
+        
     def get_architecture(self):
          return self.conf["architecture"]
