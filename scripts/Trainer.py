@@ -224,10 +224,10 @@ class Trainer:
         
         torch.save(self.model,model_path_prefix+f"_epoch_{0}.pt")
         # Train the model for the provided amount of epochs
-        for epoch in range(start_epoch, start_epoch+epochs+1):
+        for epoch in range(start_epoch, start_epoch+epochs):
             print(f'Epoch {epoch}')
             metrics_train, train_epoch_results = self.train_epoch(dl_train, batch_size, epoch)
-            if save_inter_model or (epoch==start_epoch+epochs):
+            if save_inter_model or (epoch==start_epoch+epochs-1):
                 torch.save(self.model,model_path_prefix+f"_epoch_{epoch}.pt")
 
             df_train = df_train.append(pd.DataFrame({'epoch': [epoch for _ in range(len(metrics_train["loss"]))], **metrics_train}), ignore_index=True)
