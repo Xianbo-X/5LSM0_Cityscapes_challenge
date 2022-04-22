@@ -1,5 +1,5 @@
-from scripts.unet.unet_parts import *
-from scripts.models.PositionalEncoding import PositionalEncoding
+from scripts.models.pos_unet.unet_parts import *
+from scripts.models.pos_unet.PositionalEncoding import PositionalEncoding
 
 class UNet_Pos(nn.Module):
     def __init__(self, n_channels, n_classes,in_height,in_width, bilinear=False):
