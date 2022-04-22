@@ -36,7 +36,7 @@ def visualize_fmap(image, model):
     with torch.no_grad():
         out_fmap = model.inc(image.unsqueeze(0)).squeeze().detach()
     
-    for i in range(64):
+    for i in range(out_fmap.shape[0]):
         img=TF.to_pil_image(out_fmap[i])
         img.save(os.path.join(IMAGE_DIR,"inc_fmap_"+str(i)+".jpg"))
 
@@ -44,7 +44,7 @@ def visualize_fmap(image, model):
     with torch.no_grad():
         down1_fmap = model.down1(out_fmap.unsqueeze(0)).squeeze().detach()
 
-    for i in range(10):
+    for i in range(min(10, down1_fmap.shape[0])):
         img=TF.to_pil_image(down1_fmap[i])
         img.save(os.path.join(IMAGE_DIR,"down1_fmap_"+str(i)+".jpg"))
 
@@ -55,7 +55,7 @@ def visualize_fmap(image, model):
         down3_fmap = model.down3(down2_fmap.unsqueeze(0)).squeeze().detach()
         down4_fmap = model.down4(down3_fmap.unsqueeze(0)).squeeze().detach()
 
-    for i in range(10):
+    for i in range(min(10, down4_fmap.shape[0])):
         img=TF.to_pil_image(down4_fmap[i])
         img.save(os.path.join(IMAGE_DIR,"down4_fmap_"+str(i)+".jpg"))
 
