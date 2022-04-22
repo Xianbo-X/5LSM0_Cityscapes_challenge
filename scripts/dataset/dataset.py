@@ -5,6 +5,7 @@ from PIL import Image
 from typing import Dict, Optional, Tuple, List
 
 import torchvision.transforms.functional as TF
+from torchvision import transforms
 from dataclasses import dataclass
 from typing import Tuple
 import re
@@ -159,3 +160,49 @@ class CityscapesDataset(Dataset):
 
         return TF.to_pil_image(target.cpu(), 'RGB')
     
+class CityscapesDataset_Aug(CityscapesDataset):
+    # Regular expression matching each PNG file in the dataset
+    __read_reg = r"^(\w+)_(\d+)_(\d+).*.png$"
+
+    def __init__(self, dir_input: str, dir_truth: str, sample_size: Tuple[int,int], classes: List[CityscapesSample]):
+        super().__init__(dir_input,dir_truth,sample_size,classes)
+        
+        # These variables are also available as globals, but it is good practice to make classes
+        # not depend on global variables.
+        self.no_augmentation=False
+        self.augmentations=[]
+
+    def test(self):
+        self.no_augmentation=True
+
+    def transform(self, img: Image.Image, mask: Optional[Image.Image]) -> (torch.Tensor, torch.Tensor):
+        ## EXERCISE #####################################################################
+        #
+        # Data augmentation is a way to improve the accuracy of a model.
+        #
+        # Once you have a model that works, you can implement some data augmentation 
+        # techniques here to further improve performance.
+        #
+        ##################################################################################
+        if not self.no_augmentation:
+            T=transforms.Compose(self.augmentations)
+            img,mask=T([img,mask])        
+        # pass
+        
+        ################################################################################# 
+        
+        # Convert the image to a tensor
+        img = TF.to_tensor(img)
+        # If no mask is provided, then return only the image
+        if mask is None:
+            return img, None
+
+        # Transform the mask from an image with RGB-colors to an 1-channel image with the index of the class as value
+        mask_size = [s for s in self.sample_size]
+        mask = torch.from_numpy(np.array(mask)).permute((2,0,1))
+        target = torch.zeros((mask_size[1], mask_size[0]), dtype=torch.uint8)
+        for i,c in enumerate(classes):
+            eq = mask[0].eq(c.color[0]) & mask[1].eq(c.color[1]) & mask[2].eq(c.color[2])
+            target += eq * i
+
+        return img, target
