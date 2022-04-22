@@ -63,7 +63,7 @@ class Conv2dRNN(nn.Module):
                             padding="same",
                              bias=self.bias)
 
-    def forward(self, input, hx=None):
+    def forward(self, input, hx=None,cuda_tri=False):
 
         # Input of shape (batch_size, seqence length, input_size)
         #
@@ -86,7 +86,9 @@ class Conv2dRNN(nn.Module):
         hidden = list()
         for layer in range(self.num_layers):
             hidden.append(h0[layer])
-
+        if torch.cuda.is_available() and cuda_tri:
+            hidden = [h.cuda() for h in hidden]
+            
         for t in range(input.size(1)):
 
             for layer in range(self.num_layers):
