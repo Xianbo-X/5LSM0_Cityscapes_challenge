@@ -53,7 +53,7 @@ class Config():
         SAVE_DIR = os.path.abspath(path["ROOT_PATH"])
         model_folder = os.path.join(SAVE_DIR, path["SAVE_PATH"], path["MODEL_PATH"])
         model_prefix = os.path.join(model_folder, path["MODEL_PREFIX"])
-        return model_prefix
+        return os.path.abspath(model_prefix)
 
     
     def get_model_folder(self):
@@ -61,14 +61,14 @@ class Config():
         SAVE_DIR = os.path.abspath(path["ROOT_PATH"])
         model_folder = os.path.join(SAVE_DIR, path["SAVE_PATH"], path["MODEL_PATH"])
 
-        return model_folder
+        return os.path.abspath(model_folder)
 
     def get_result_folder(self):
         path = self.conf["path"]
         SAVE_DIR = os.path.abspath(path["ROOT_PATH"])
         result_folder = os.path.join(SAVE_DIR, path["SAVE_PATH"], path["RESULT_PATH"])
         
-        return result_folder
+        return os.path.abspath(result_folder)
         
     def get_architecture(self):
          return self.conf["architecture"]

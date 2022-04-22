@@ -28,12 +28,12 @@ sample_size = (256, 128)
 # Directories for preprocessed datasets
 dir_truth_pp, dir_input_pp = (f'{d}_{sample_size[0]}_{sample_size[1]}' for d in (dir_truth, dir_input))
 
-def training(model,ds_split,epochs, batch_size, learning_rate, aug_mode, result_folder,writer):
+def training(model,ds_split,conf:Config,writer):
     # Train the network
     print("Testing training process...")
     writer = SummaryWriter(os.path.join(result_folder,"logs/passthrough"))
-    trainer = Trainer(model, ds_split, learning_rate, writer)
-    df_train, df_val = trainer.fit(epochs=epochs, batch_size=batch_size,aug_mode=aug_mode)
+    trainer = Trainer(model, ds_split,writer=writer, **conf.get_func_param(Trainer.__init__))
+    df_train, df_val = trainer.fit(result_folder=conf.get_result_folder(),model_path_prefix=conf.get_saves_path_prefix(),**conf.get_func_param(trainer.fit))
 
     with open(os.path.join(result_folder,"train.json"), 'w') as file_train:
         json.dump(df_train.to_dict(),file_train)

@@ -10,7 +10,8 @@
         "learning_rate": 0.01,
         "epochs": 1,
         "batch_size": 5,
-        "aug_mode": "None"
+        "aug_mode": "None",
+        "save_inter_model":true
     },
     "augmentation": {
         "transformation": {
