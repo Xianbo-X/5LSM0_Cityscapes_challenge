@@ -1,6 +1,7 @@
 from importlib import import_module
 import json
 import inspect
+import os
 
 class Config():
     def __init__(self,filepath) -> None:
@@ -29,3 +30,20 @@ class Config():
     def get_func_param(self,func):
         params=inspect.getfullargspec(func)[0]
         return dict((key,value) for key, value in self.conf["param"].items() if key in params)
+
+    def get_saves_path(self):
+        path = self.conf["path"]
+        SAVE_DIR = os.path.abspath(path["ROOT_PATH"])
+        model_folder = os.path.join(SAVE_DIR, path["SAVE_PATH"], path["MODEL_PATH"])
+        result_folder = os.path.join(SAVE_DIR, path["SAVE_PATH"], path["RESULT_PATH"])
+
+        if not os.path.exists(model_folder):
+            os.makedirs(model_folder)
+        if not os.path.exists(result_folder):
+            os.makedirs(result_folder)
+
+        model_path = os.path.join(model_folder, path["MODEL_PREFIX"]+".pt")
+        return result_folder, model_path
+
+    def get_architecture(self):
+         return self.conf["architecture"]
