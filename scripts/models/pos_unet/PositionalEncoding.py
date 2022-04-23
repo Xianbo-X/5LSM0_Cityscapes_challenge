@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from scripts.unet.unet_parts import DoubleConv
+from scripts.models.pos_unet.unet_parts import DoubleConv
 
 class PositionalEncoding(nn.Module):
     def __init__(self,in_channels,in_height,in_width) -> None:
