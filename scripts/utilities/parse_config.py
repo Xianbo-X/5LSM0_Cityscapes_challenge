@@ -3,6 +3,8 @@ import json
 import inspect
 import os
 
+import torch
+
 class Config():
     def __init__(self,filepath) -> None:
         self.conf=self.load_conf(filepath)
@@ -18,6 +20,9 @@ class Config():
         class_package=prefix
         class_name=arch["model"]
         module=import_module(class_package)
+        if arch.get("pretrained"):
+            print(f"load from {arch['pretrained']}")
+            return torch.load(arch["pretrained"])
         return module.__getattribute__(class_name)(**arch["param"])
 
     def get_transformationlist(self):
