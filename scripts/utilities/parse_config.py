@@ -6,6 +6,9 @@ import os
 import torch
 
 class Config():
+    """
+    Used to parse our configuration file
+    """
     def __init__(self,filepath) -> None:
         self.conf=self.load_conf(filepath)
         
