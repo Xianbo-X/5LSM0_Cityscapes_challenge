@@ -40,6 +40,45 @@ def training(model,ds_split,conf:Config,writer):
     with open(os.path.join(result_folder,"val.json"), 'w') as file_val:
         json.dump(df_val.to_dict(),file_val)
 
+def train_from_config(config_path):
+    config_path=os.path.abspath(config_path)
+    print(f"load from {config_path}")
+    conf=Config(config_path)
+    # Create one instance of the CityscapesDataset for each split type
+    ds_split = {
+        name:CityscapesDataset_Aug(os.path.join(dir_input_pp, name), os.path.join(dir_truth_pp, name), sample_size, classes)
+        for name in ("train", "val", "test")
+    }
+    for key,value in ds_split.items():
+        value.set_transform_list(conf.get_transformationlist())
+
+    ds_split["val"].no_aug()
+    ds_split["test"].no_aug()
+    
+    model_folder=conf.get_model_folder()
+    result_folder=conf.get_result_folder()
+    assert not os.path.exists(model_folder), "please remove the folder to avoid overwrite"
+    os.makedirs(model_folder)
+    assert not os.path.exists(result_folder), "please remove the folder to avoid overwrite"
+    os.makedirs(result_folder)
+    print(f"model foler: {model_folder}")
+    print(f"result foler: {result_folder}")
+    try:
+        with open(os.path.join(conf.get_save_path(),"config.json"),"w") as fout:
+            json.dump(conf.conf,fout)
+            print(f"configuration file write to {os.path.join(result_folder,'config.json')}")
+
+        writer = SummaryWriter(os.path.join(result_folder,"logs/"))
+        model = conf.get_model()
+        print("model name: "+str(model).split("\n")[0])
+        training(model,ds_split,conf,writer=writer)
+    except Exception as e:
+      try:
+        torch.save(model,os.path.join(model_folder,"failed_autosave_model.pt"))
+      except Exception as e:
+        torch.save(model,"failed_autosave_model.pt")
+        raise(e)
+      raise(e)
     
 
 if __name__=="__main__":
@@ -56,41 +95,4 @@ if __name__=="__main__":
     )
     args=parser.parse_args()
     if args.path is not None:
-        config_path=os.path.abspath(args.path)
-        print(f"load from {config_path}")
-        conf=Config(config_path)
-        # Create one instance of the CityscapesDataset for each split type
-        ds_split = {
-            name:CityscapesDataset_Aug(os.path.join(dir_input_pp, name), os.path.join(dir_truth_pp, name), sample_size, classes)
-            for name in ("train", "val", "test")
-        }
-        for key,value in ds_split.items():
-            value.set_transform_list(conf.get_transformationlist())
-
-        ds_split["val"].no_aug()
-        ds_split["test"].no_aug()
-        
-        model_folder=conf.get_model_folder()
-        result_folder=conf.get_result_folder()
-        assert not os.path.exists(model_folder)
-        os.makedirs(model_folder)
-        assert not os.path.exists(result_folder)
-        os.makedirs(result_folder)
-        print(f"model foler: {model_folder}")
-        print(f"result foler: {result_folder}")
-        try:
-            with open(os.path.join(conf.get_save_path(),"config.json"),"w") as fout:
-                json.dump(conf.conf,fout)
-                print(f"configuration file write to {os.path.join(result_folder,'config.json')}")
-
-            writer = SummaryWriter(os.path.join(result_folder,"logs/"))
-            model = conf.get_model()
-            print("model name: "+str(model).split("\n")[0])
-            training(model,ds_split,conf,writer=writer)
-            # trainer=Trainer(model,ds_split,**conf.get_func_param(Trainer.__init__),writer=None)
-            # trainer.fit(**conf.get_func_param(trainer.fit))
-            if args.save_name is not None:
-                torch.save(model,args.save_name)
-        except Exception as e:
-            torch.save(model,os.path.join(model_folder,"failed_autosave_model.pt"))
-            raise(e)
+        train_from_config(args.path)
