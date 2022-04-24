@@ -1,4 +1,7 @@
 """ Parts of the U-Net model """
+# The baseline part of UNet, we use an online implementation
+
+# UNet: https://github.com/milesial/Pytorch-UNet
 
 import torch
 import torch.nn as nn

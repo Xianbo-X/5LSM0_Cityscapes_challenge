@@ -1,4 +1,7 @@
 """ Full assembly of the parts to form the complete network """
+# UNet: https://github.com/milesial/Pytorch-UNet
+# The UNet is an online version
+# Other models are created by us.
 
 from .unet_parts import *
 
@@ -36,6 +39,9 @@ class UNet(nn.Module):
         return logits
 
 class UNet_1(nn.Module):
+    """
+    Reduce the down sample times
+    """
     def __init__(self, n_channels, n_classes, bilinear=False):
         super(UNet_1, self).__init__()
         self.n_channels = n_channels
@@ -64,6 +70,9 @@ class UNet_1(nn.Module):
         return logits
 
 class UNet_2(nn.Module):
+    """
+    Reduce the channel number
+    """
     def __init__(self, n_channels, n_classes, bilinear=False):
         super(UNet_2, self).__init__()
         self.n_channels = n_channels
@@ -95,9 +104,12 @@ class UNet_2(nn.Module):
         logits = self.outc(x)
         return logits
 
-class UNet_1_2(nn.Module):
+class UNet_2_1(nn.Module):
+    """
+    Reduce the channel number and downsample times
+    """
     def __init__(self, n_channels, n_classes, bilinear=False):
-        super(UNet_1_2, self).__init__()
+        super(UNet_2_1, self).__init__()
         self.n_channels = n_channels
         self.n_classes = n_classes
         self.bilinear = bilinear
