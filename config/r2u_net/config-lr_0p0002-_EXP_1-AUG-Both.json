@@ -1,0 +1,38 @@
+{
+    "architecture":{
+        "prefix":"scripts.models.r2unet",
+        "model":"R2UNet64",
+        "param":{
+            "n_channels": 3,
+            "n_classes": 30},
+        "pretrained": "saves/EXP3_r2unet/models/r2unet_epoch_15.pt"
+    },
+    "param": {
+        "learning_rate": 0.0002,
+        "epochs": 2,
+        "batch_size": 5,
+        "aug_mode": "Both",
+        "start_epoch":16,
+        "save_inter_model":true
+    },
+    "augmentation": {
+        "transformation": {
+            "prefix": "scripts.data_augmentation",
+            "transforms": [ {
+                    "name": "crop.RandomCropAndResize", "param": { "pr": 0.3, "width_lim": [ 30, 250 ], "height_lim": [ 30, 120 ] } },
+                { "name": "flip.RandomHorizontalFlip2", "param": { "pr": 0.3 } }, { "name": "pixels_change.RandomRgb2Gray2", "param": { "pr": 0.3 } }, {
+                    "name": "rotate.RandomRotation", "param": { "pr": 0 }
+                }
+            ]
+        }
+    },
+    "path":{
+        "ROOT_PATH": "saves",
+        "SAVE_PATH": "EXP4_r2unetAUG",
+        "MODEL_PATH":"models",
+        "CHECK_POINT":"",
+        "MODEL_PREFIX": "r2unetAUG",
+        "RESULT_PATH": "res",
+        "PRETAIN_FOLDER":"saves/EXP3_r2unet/"
+    }
+}
