@@ -1,3 +1,8 @@
+""" Full assembly of the parts to form the complete network """
+# R2U-Net: https://github.com/tomasamado/cityscapes-image-segmentation
+# The R2U-Net is an online version
+# Other models are created by us.
+
 #!/usr/bin/env python
 # coding: utf-8
 # %%
