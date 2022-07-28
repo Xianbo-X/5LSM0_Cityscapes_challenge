@@ -1,0 +1,28 @@
+{
+    "arch": {
+        "module": "unet",
+        "param": ""
+    },
+    "param": {
+        "learning_rate": 0.1,
+        "epochs": 1,
+        "batch_size": 10,
+        "aug_mode": "Both"
+    },
+    "augmentation": {
+        "transformation": {
+            "prefix": "scripts.data_augmentation",
+            "transforms": [ {
+                    "name": "crop.RandomCropAndResize", "param": { "pr": 1, "width_lim": [ 30, 250 ], "height_lim": [ 30, 120 ] } },
+                { "name": "flip.RandomHorizontalFlip2", "param": { "pr": 1 } }, { "name": "pixels_change.RandomRgb2Gray2", "param": { "pr": 1 } }, {
+                    "name": "rotate.RandomRotation", "param": { "pr": 1 }
+                }
+            ]
+        }
+    },
+    "path": {
+        "ROOT_PATH": "",
+        "MODEL_PREFIX": "",
+        "RESULT_PATH": ""
+    }
+}

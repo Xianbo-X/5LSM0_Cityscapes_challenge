@@ -1,0 +1,35 @@
+{
+    "architecture":{
+        "prefix":"scripts.models.res_unet.res_unet",
+        "model":"Res_UNet",
+        "param":{
+            "n_channels": 3,
+            "n_classes": 30}
+    },
+    "param": {
+        "learning_rate": 0.01,
+        "epochs": 1,
+        "batch_size": 5,
+        "aug_mode": "None",
+        "save_inter_model":true
+    },
+    "augmentation": {
+        "transformation": {
+            "prefix": "scripts.data_augmentation",
+            "transforms": [ {
+                    "name": "crop.RandomCropAndResize", "param": { "pr": 1, "width_lim": [ 30, 250 ], "height_lim": [ 30, 120 ] } },
+                { "name": "flip.RandomHorizontalFlip2", "param": { "pr": 1 } }, { "name": "pixels_change.RandomRgb2Gray2", "param": { "pr": 1 } }, {
+                    "name": "rotate.RandomRotation", "param": { "pr": 1 }
+                }
+            ]
+        }
+    },
+    "path":{
+        "ROOT_PATH": "saves",
+        "SAVE_PATH": "EXP1",
+        "MODEL_PATH":"models",
+        "CHECK_POINT":"",
+        "MODEL_PREFIX": "unet",
+        "RESULT_PATH": "res"
+    }
+}

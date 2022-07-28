@@ -1,0 +1,24 @@
+{
+    "architecture":{
+        "prefix": "scripts.models.unet",
+        "model":"UNet",
+        "param":{
+            "n_channels": 3,
+            "n_classes": 30}
+    },
+    "param":{
+        "learning_rate": 0.1,
+        "epochs": 1,
+        "batch_size": 10,
+        "aug_mode": "",
+        "transformation": ""
+    },
+    "path":{
+        "ROOT_PATH": "saves",
+        "SAVE_PATH": "EXP1",
+        "MODEL_PATH":"models",
+        "CHECK_POINT":"",
+        "MODEL_PREFIX": "unet",
+        "RESULT_PATH": "res"
+    }
+}
